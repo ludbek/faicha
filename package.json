@@ -1,6 +1,6 @@
 {
-  "name": "psql-query-template",
-  "version": "1.0.2",
+  "name": "faicha",
+  "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "test": "jest"
@@ -9,11 +9,14 @@
   "license": "MIT",
   "private": false,
   "keywords": [
+    "sql",
+    "mysql",
     "psql",
     "query",
     "template",
     "pg",
-    "postgres"
+    "postgres",
+    "render"
   ],
   "devDependencies": {
     "jest": "^23.4.1"
