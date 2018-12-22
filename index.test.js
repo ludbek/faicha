@@ -2,6 +2,7 @@ const {
   placeholderGenerator,
   where,
   sql,
+  psql,
   limit,
   offset,
   and,
@@ -10,7 +11,7 @@ const {
 
 describe("placeholderGenerator.gen", () => {
   it("should return placeholder", () => {
-    const $ = placeholderGenerator()
+    const $ = placeholderGenerator('$')
     expect($.gen('a')).toEqual('$1')
     expect($.gen('b')).toEqual('$2')
   })
@@ -18,7 +19,7 @@ describe("placeholderGenerator.gen", () => {
 
 describe("placeholderGenerator.getValues", () => {
   it("should return values", () => {
-    const $ = placeholderGenerator()
+    const $ = placeholderGenerator('$')
     $.gen('a')
     $.gen('b')
 
@@ -28,7 +29,7 @@ describe("placeholderGenerator.getValues", () => {
 
 describe("where", () => {
   it("works", () => {
-    const $ = placeholderGenerator()
+    const $ = placeholderGenerator('$')
     const params = {
       name: 'aname',
       id: ['aid', 'bid'],
@@ -76,6 +77,38 @@ describe("sql", () => {
 
     const expectedSql = `
     SELECT * FROM users
+    WHERE ( id = ? AND name like ? )
+    LIMIT ?
+    OFFSET ?;
+    `
+    const expected = [expectedSql, [1, "apple", 10, 20]]
+    expect(result).toEqual(expected)
+  })
+})
+
+describe("psql", () => {
+  it("works", () => {
+    const params = {
+      id: 1,
+      name: 'apple',
+      limit: 10,
+      offset: 20
+    }
+    const result = psql`
+    SELECT * FROM users
+    ${where(
+      and(
+        ['id =', params.id],
+        ['name like', params.name],
+        ['location =', params.location]
+      )
+    )}
+    ${limit(params.limit)}
+    ${offset(params.offset)};
+    `
+
+    const expectedSql = `
+    SELECT * FROM users
     WHERE ( id = $1 AND name like $2 )
     LIMIT $3
     OFFSET $4;
@@ -87,18 +120,18 @@ describe("sql", () => {
 
 describe("limit", () => {
   it("works", () => {
-    const $ = placeholderGenerator()
+    const $ = placeholderGenerator('?')
     const params = {
       limit: 10
     }
-    const expected = 'LIMIT $1'
+    const expected = 'LIMIT ?'
     const got = limit(params.limit)($.gen)
     expect(got).toEqual(expected)
     expect($.getValues()).toEqual([params.limit])
   })
 
   it("returns empty string if falsy value is passed", () => {
-    const $ = placeholderGenerator()
+    const $ = placeholderGenerator('?')
     const expected = ''
 
     const got1 = limit(undefined)($.gen)
@@ -117,11 +150,11 @@ describe("limit", () => {
 
 describe("offset", () => {
   it("works", () => {
-    const $ = placeholderGenerator()
+    const $ = placeholderGenerator('?')
     const params = {
       offset: 50
     }
-    const expected = 'OFFSET $1'
+    const expected = 'OFFSET ?'
     const got = offset(params.offset)($.gen)
     expect(got).toEqual(expected)
     expect($.getValues()).toEqual([params.offset])

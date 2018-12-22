@@ -1,10 +1,13 @@
-function placeholderGenerator() {
+function placeholderGenerator(symbol = '') {
   let queryValues = []
 
   return {
     gen(value) {
       queryValues.push(value)
-      return `$${queryValues.length}`
+      if(symbol === '$') {
+        return `$${queryValues.length}`
+      }
+      return `?`
     },
     getValues() {
       return queryValues
@@ -14,17 +17,27 @@ function placeholderGenerator() {
 
 // for tagged template see
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
-function sql(strings) {
-  const $ = placeholderGenerator()
-
-  let fillers = Array.from(arguments)
+function render(args, generator) {
+  let fillers = Array.from(args)
   fillers.shift()
-  let result = [strings[0]]
+  let result = [args[0][0]]
   fillers.forEach((filler, index) => {
-    result.push(filler($.gen), strings[index + 1])
+    result.push(filler(generator.gen), args[0][index + 1])
   })
 
-  return [result.join(''), $.getValues()]
+  return [result.join(''), generator.getValues()]
+}
+
+function sql(strings) {
+  const args = Array.from(arguments)
+  const generator = placeholderGenerator('?')
+  return render(args, generator)
+}
+
+function psql(strings) {
+  const args = Array.from(arguments)
+  const generator = placeholderGenerator('$')
+  return render(args, generator)
 }
 
 function q($, unit) {
@@ -111,6 +124,7 @@ function offset(value) {
 module.exports = {
   placeholderGenerator,
   sql,
+  psql,
   where,
   limit,
   offset,
