@@ -1,6 +1,6 @@
 {
   "name": "faicha",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "scripts": {
     "test": "jest"
@@ -21,6 +21,6 @@
   "devDependencies": {
     "jest": "^23.4.1"
   },
-  "description": "It empowers one to write complex and safe Postgres queries.",
-  "repository": "git@github.com:brandsExclusive/psql-query-template.git"
+  "description": "It empowers one to write complex and safe sql queries.",
+  "repository": "git@github.com:ludbek/faicha.git"
 }
