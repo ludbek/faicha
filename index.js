@@ -93,8 +93,17 @@ function or() {
   }
 }
 
-function where(orAnd) {
+function where() {
   return ($) => {
+    let orAnd
+    const args = Array.from(arguments)
+    if(args.length > 0 && Array.isArray(args[0])) {
+      orAnd = and(...args)
+    }
+    else {
+      orAnd = args[0]
+    }
+
     const partialQuery = orAnd($)
     if (partialQuery) {
       return 'WHERE ' + partialQuery

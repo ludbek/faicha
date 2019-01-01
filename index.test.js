@@ -52,6 +52,21 @@ describe("where", () => {
     expect(got).toEqual(expected)
     expect($.getValues()).toEqual(['aname', 'aid', 'bid'])
   })
+
+  it("implicitly sets and()", () => {
+    const params = {
+      name: 'aname',
+      age: '1'
+    }
+    const $ = placeholderGenerator('$')
+    const got = where(
+      ['name =', params.name],
+      ['age =', params.age]
+    )($.gen)
+    const expected = "WHERE ( name = $1 AND age = $2 )"
+    expect(got).toEqual(expected)
+    expect($.getValues()).toEqual(['aname', '1'])
+  })
 })
 
 describe("sql", () => {
