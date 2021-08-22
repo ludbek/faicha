@@ -1,10 +1,25 @@
 {
   "name": "faicha",
-  "version": "1.1.0",
-  "main": "index.js",
+  "version": "1.2.0",
+  "main": "lib/index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest --config jestconfig.json",
+    "build": "tsc",
+    "format": "prettier --write \"src/**/*.ts\" \"./*.json\"",
+    "lint": "tslint -p tsconfig.json"
   },
+  "files": ["lib/index.js", "lib/index.d.js"],
+  "devDependencies": {
+    "@types/jest": "^26.0.24",
+    "jest": "^27.0.6",
+    "prettier": "^2.3.2",
+    "ts-jest": "^27.0.3",
+    "tslint": "^6.1.3",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^4.0.0"
+  },
+  "description": "It empowers one to write complex and safe sql queries.",
+  "repository": "git@github.com:ludbek/faicha.git",
   "author": "ludbek <sth.srn@gmail.com>",
   "license": "MIT",
   "private": false,
@@ -17,10 +32,5 @@
     "pg",
     "postgres",
     "render"
-  ],
-  "devDependencies": {
-    "jest": "^23.4.1"
-  },
-  "description": "It empowers one to write complex and safe sql queries.",
-  "repository": "git@github.com:ludbek/faicha.git"
+  ]
 }

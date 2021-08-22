@@ -12,6 +12,24 @@ or
 
 `npm install --save faicha`
 
+## Concepts
+In complex queries, majority of it are static only some portions are dynamic.
+For an example, imagine a reporting query which joins multiple tables, includes
+subqueries and allows filter. In that query most of the time filter will be the only dynamic part.
+
+While working with `faicha` we do not need to learn new DSL.
+We will mostly be writing low level native queries and
+few functions to fill the dynamic parts.
+
+## Fillers
+Right now there are only 3 fillers bundled with `faicha`. Its really easy to write new filler which we will see [later]().
+
+### 1. where
+#### and
+#### or
+### 2. limit 
+### 3. offset
+## Custom filler
 
 ## SQL Walkthrough
 ```javascript
