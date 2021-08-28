@@ -7,6 +7,8 @@ import {
   offset,
   and,
   or,
+  values,
+  select,
 } from './index';
 
 describe('placeholderGenerator.gen', () => {
@@ -196,5 +198,28 @@ describe('offset', () => {
 
     const got4 = offset(false)($.gen);
     expect(got4).toEqual('');
+  });
+});
+
+describe('values', () => {
+  it('works', () => {
+    const $ = placeholderGenerator('$');
+    const data = {
+      name: 'a name',
+      address: 'an address',
+    };
+    const expectedPartialQuery = `(name, address) VALUES ($1, $2)`;
+    expect(values(data)($.gen)).toEqual(expectedPartialQuery);
+    expect($.getValues()).toEqual([data.name, data.address]);
+  });
+});
+
+describe('select', () => {
+  it('works', () => {
+    const generator = placeholderGenerator('$');
+    const expectedPartialQuery = `SELECT $1, $2`;
+    expect(select(['name', 'address'])(generator.gen)).toEqual(
+      expectedPartialQuery,
+    );
   });
 });

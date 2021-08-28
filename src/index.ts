@@ -166,3 +166,21 @@ export function offset(value: number): Filler {
     return '';
   };
 }
+
+type Object = Record<string, unknown>;
+export function values(v: Object): Filler {
+  return ($: Generator) => {
+    const keys = Object.keys(v);
+    if (keys.length === 0)
+      throw new Error(`Data cannot be empty. Got ${JSON.stringify(v)}`);
+    const columns = `(${keys.join(', ')})`;
+    const values = `(${keys.map((key) => $(v[key])).join(', ')})`;
+    return `${columns} VALUES ${values}`;
+  };
+}
+
+export function select(columns: string[]): Filler {
+  return ($: Generator) => {
+    return `SELECT ${columns.map($).join(', ')}`;
+  };
+}
