@@ -1,158 +1,125 @@
-## faicha
-It empowers one to write complex and safe sql queries.
+# faicha
 
-## Problems it solves
-- static sql queries do not scale
-- its hard to express complex db queries using ORM and query builders
+## Why yet another query generator?
 
-## Installation
-`yarn add faicha`
+Composing a sql query does not need to be complex.
+`faicha` has single abstraction, thats it.
 
-or
+The idea behind `faicha` is to replace dynamic parts of
+the queries with functions. While working with `faicha`
+we mostly write plain sql statements.
 
-`npm install --save faicha`
+## An example of using `faicha`
 
-## Concepts
-In complex queries, majority of it are static only some portions are dynamic.
-For an example, imagine a reporting query which joins multiple tables, includes
-subqueries and allows filter. In that query most of the time filter will be the only dynamic part.
+```javascript
+import { psql, sql, where } from 'faicha';
+// psql for postgres
+// sql for mysql
 
-While working with `faicha` we do not need to learn new DSL.
-We will mostly be writing low level native queries and
-few functions to fill the dynamic parts.
+const query = sql`
+SELECT * FROM users
+INNER JOIN sessions ON sessions.user_id = users.id
+${where({ 'users.id =': 123, 'users.active =': true })}
+`;
+
+console.log(query);
+//  [
+//    'SELECT * FROM users INNER JOIN sessions ON sessions.user_id = users.id WHERE users.id = ? AND users.active = ?',
+//    [123, true],
+//  ];
+```
+
+The interesting part here is `where`. Its just a normal function
+that gets `placeholder generator` as an argument.
+
+Lets implement a simple form of `where` here. This will give us
+an idea of how we can construct the dynamic parts of queries
+when we need to.
+
+```javascript
+function where(id) {
+  return ($) => {
+    return `WHERE id = ${$(id)}`;
+  };
+}
+
+const query = sql`SELECT * FROM users ${where(123)}`;
+console.log(query);
+// ["SELECT * FROM users WHERE id = ?", [123]]
+```
 
 ## Fillers
-Right now there are only 3 fillers bundled with `faicha`. Its really easy to write new filler which we will see [later]().
 
-### 1. where
-#### and
-#### or
-### 2. limit 
-### 3. offset
-## Custom filler
+We will call these dynamic parts `fillers`.
 
-## SQL Walkthrough
+`faicha` packs some essential `fillers`.
+
+### where
+
+When a map is passed to `where`, it uses `and`.
+
 ```javascript
-const {sql, where, and, or, limit} = require("faicha")
+import { sql, where } from 'faicha'
 
-const queryParams = {
-  search: "lal",
-  location: "sydney",
-  page: 2,
-  limit: 50
-}
+const query = sql`SELECT * FROM users ${where({id: 1 active: true})}`
+console.log(query)
+// ["SELECT * FROM users WHERE (id = ? AND active = ?)",  [1, true]]
+```
 
-// faicha makes use of tagged template
-// visit https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates
-// prepare query template
+#### or / and
+
+For complex logics we can use `and` and `or` fillers.
+
+```javascript
+import { sql, where, and, or } from 'faicha'
+
 const query = sql`
-SELECT * FROM user
-
+SELECT * FROM users
 ${where(
-  or(
-    ["name ilike", queryParams.search],
-    and(
-      ["location =", queryParams.location],
-      ["password =", undefined],
-      "active = TRUE"
+    and(["id =", 1],
+        or(["active =" true], ["city =" "kathmandu"])
     )
-  )
-)}
-
-${limit(queryParams.limit)}
-
-${genPlaceholder => {
-  // this is a custom filler for offset
-  // this is how where and limit works internally
-  const { page, limit } = queryParams
-  if(page) {
-    const offset = (page - 1) * limit
-    return `OFFSET ${genPlaceholder(offset)}`
-  }
-  return ''
-}}
-;
+  )}
 `
-
-console.log(query[0])
->>
->> SELECT * FROM user
->>
->> WHERE ( name ilike ? OR ( location = ? AND active = TRUE ) )
->>
->> LIMIT ?
->>
->> OFFSET ?
->> ;
-
-console.log(query[1])
->> ["lal", "sydney", 50, 50]
-
-
-// query the db
-await client.query(...query)
-
+console.log(query)
+// ["SELECT * FROM users WHERE (id = ? AND (active = ? OR city = ?))", [1, true, "kathmandu"]]
 ```
 
-## Postgres Walkthrough
+### select
+
+### values
+
+`values` can be used to insert data.
+
+#### Insert single data
+
 ```javascript
-const {psql, where, and, or, limit} = require("faicha")
+import { sql, values } from 'faicha';
 
-const queryParams = {
-  search: "lal",
-  location: "sydney",
-  page: 2,
-  limit: 50
-}
-
-// faicha makes use of tagged template
-// visit https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates
-// prepare query template
-const query = psql`
-SELECT * FROM user
-
-${where(
-  or(
-    ["name ilike", queryParams.search],
-    and(
-      ["location =", queryParams.location],
-      ["password =", undefined],
-      "active = TRUE"
-    )
-  )
-)}
-
-${limit(queryParams.limit)}
-
-${genPlaceholder => {
-  // this is a custom filler for offset
-  // this is how where and limit works internally
-  const { page, limit } = queryParams
-  if(page) {
-    const offset = (page - 1) * limit
-    return `OFFSET ${genPlaceholder(offset)}`
-  }
-  return ''
-}}
-;
-`
-
-console.log(query[0])
->>
->> SELECT * FROM user
->>
->> WHERE ( name ilike $1 OR ( location = $2 AND active = TRUE ) )
->>
->> LIMIT $3
->>
->> OFFSET $4
->> ;
-
-console.log(query[1])
->> ["lal", "sydney", 50, 50]
-
-
-// query the db
-await client.query(...query)
-
+const query = sql`
+INSERT INTO users
+${values({ email: 'someone@example.com', city: 'kathmandu' })}
+`;
+console.log(query);
+// ["INSERT INTO users (email, city) VALUES (?, ?)", ["someone@example.com", "kathmandu"]]
 ```
+
+### set
+
+`set` is used for updating table
+
+```javascript
+import { sql, set, where } from 'faicha';
+
+const query = sql`
+UPDATE users
+${set({ email: 'someone@example.com' })}
+${where({ id: 1 })}
+`;
+console.log(query);
+// ["UPDATE users SET email = ? WHERE (id = ?)", ["someone@example.com", 1]]
+```
+
+### limit
+
+### offset

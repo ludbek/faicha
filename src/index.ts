@@ -184,3 +184,12 @@ export function select(columns: string[]): Filler {
     return `SELECT ${columns.map($).join(', ')}`;
   };
 }
+
+export function set(values: Object) {
+  return ($: Generator) => {
+    const keyValPairs = Object.keys(values).map(
+      (key) => `${key} = ${$(values[key])}`,
+    );
+    return `SET ${keyValPairs.join(', ')}`;
+  };
+}

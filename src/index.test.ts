@@ -9,6 +9,7 @@ import {
   or,
   values,
   select,
+  set,
 } from './index';
 
 describe('placeholderGenerator.gen', () => {
@@ -221,5 +222,18 @@ describe('select', () => {
     expect(select(['name', 'address'])(generator.gen)).toEqual(
       expectedPartialQuery,
     );
+  });
+});
+
+describe('set', () => {
+  it('works', () => {
+    const generator = placeholderGenerator('$');
+    const expectedPartialQuery = `SET name = $1, address = $2`;
+    const values = {
+      name: 'a name',
+      address: 'an address',
+    };
+    expect(set(values)(generator.gen)).toEqual(expectedPartialQuery);
+    expect(generator.getValues()).toEqual([values.name, values.address]);
   });
 });
