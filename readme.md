@@ -50,6 +50,19 @@ console.log(query);
 
 ## Fillers
 
+<!-- vim-markdown-toc GFM -->
+
+- [where](#where)
+  - [or / and](#or--and)
+- [select](#select)
+- [values](#values)
+  - [Insert single data](#insert-single-data)
+- [set](#set)
+- [limit](#limit)
+- [offset](#offset)
+
+<!-- vim-markdown-toc -->
+
 We will call these dynamic parts `fillers`.
 
 `faicha` packs some essential `fillers`.
