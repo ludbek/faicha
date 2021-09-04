@@ -1,5 +1,21 @@
 # faicha
 
+<!-- vim-markdown-toc GFM -->
+
+- [Why yet another query generator?](#why-yet-another-query-generator)
+- [What it looks like ?](#what-it-looks-like-)
+- [Fillers](#fillers)
+  - [where](#where)
+    - [or / and](#or--and)
+  - [select](#select)
+  - [values](#values)
+    - [Insert single data](#insert-single-data)
+  - [set](#set)
+  - [limit](#limit)
+  - [offset](#offset)
+
+<!-- vim-markdown-toc -->
+
 ## Why yet another query generator?
 
 Composing a sql query does not need to be complex.
@@ -9,7 +25,7 @@ The idea behind `faicha` is to replace dynamic parts of
 the queries with functions. While working with `faicha`
 we mostly write plain sql statements.
 
-## An example of using `faicha`
+## What it looks like ?
 
 ```javascript
 import { psql, sql, where } from 'faicha';
@@ -49,19 +65,6 @@ console.log(query);
 ```
 
 ## Fillers
-
-<!-- vim-markdown-toc GFM -->
-
-- [where](#where)
-  - [or / and](#or--and)
-- [select](#select)
-- [values](#values)
-  - [Insert single data](#insert-single-data)
-- [set](#set)
-- [limit](#limit)
-- [offset](#offset)
-
-<!-- vim-markdown-toc -->
 
 We will call these dynamic parts `fillers`.
 
